@@ -1,0 +1,7 @@
+.git
+.gradle
+.idea
+.gitignore
+.gitmodules
+.travis.yml
+Dockerfile
