@@ -1,14 +1,17 @@
 package applet;
 
 import javacard.framework.*;
+import javacard.security.KeyBuilder;
+import javacard.security.KeyPair;
+import javacard.security.PublicKey;
 import javacard.security.RandomData;
 
-public class MainApplet extends Applet implements MultiSelectable
+public class MainApplet extends Applet implements ISO7816
 {
-	private static final short BUFFER_SIZE = 32;
+	private static final short SCRATCHPAD_SIZE = 256;
 
-	private byte[] tmpBuffer = JCSystem.makeTransientByteArray(BUFFER_SIZE, JCSystem.CLEAR_ON_DESELECT);
-	private RandomData random;
+	private byte[] scratchpad = JCSystem.makeTransientByteArray(SCRATCHPAD_SIZE, JCSystem.CLEAR_ON_DESELECT);
+	protected KeyPair kp = new KeyPair(KeyPair.ALG_EC_FP, KeyBuilder.LENGTH_EC_F2M_163);
 
 	public static void install(byte[] bArray, short bOffset, byte bLength) 
 	{
@@ -17,7 +20,7 @@ public class MainApplet extends Applet implements MultiSelectable
 	
 	public MainApplet(byte[] buffer, short offset, byte length)
 	{
-		random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
+        kp.genKeyPair();
 		register();
 	}
 
@@ -30,19 +33,24 @@ public class MainApplet extends Applet implements MultiSelectable
 		short p1 = (short)apduBuffer[ISO7816.OFFSET_P1];
 		short p2 = (short)apduBuffer[ISO7816.OFFSET_P2];
 
-		random.generateData(tmpBuffer, (short) 0, BUFFER_SIZE);
+        if (this.selectingApplet()) { return; }
 
-		Util.arrayCopyNonAtomic(tmpBuffer, (short)0, apduBuffer, (short)0, BUFFER_SIZE);
-		apdu.setOutgoingAndSend((short)0, BUFFER_SIZE);
+        switch (ins) {
+            case 0x00:
+                sendPublicKey(apdu);
+                return;
+            default:
+                ISOException.throwIt (ISO7816.SW_INS_NOT_SUPPORTED);
+        }
 	}
 
-	@Override
-	public boolean select(boolean b) {
-		return true;
-	}
+    private void sendPublicKey(APDU apdu) {
+        byte buffer[] = apdu.getBuffer();
+        PublicKey pk = kp.getPublic();
+        byte type = pk.getType();
+        short size = pk.getSize();
 
-	@Override
-	public void deselect(boolean b) {
-
-	}
+        //Util.arrayCopyNonAtomic(tmpBuffer, (short)0, apduBuffer, (short)0, BUFFER_SIZE);
+        //apdu.setOutgoingAndSend((short)0, BUFFER_SIZE);
+    }
 }
