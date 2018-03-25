@@ -1,9 +1,12 @@
 package tests;
 
-import org.junit.Assert;
+import applet.MainApplet;
+import cardTools.CardManager;
+import cardTools.RunConfig;
+import cardTools.Util;
 import org.testng.annotations.*;
 
-import javax.smartcardio.ResponseAPDU;
+import java.security.PublicKey;
 
 /**
  * Example test class for the applet
@@ -12,8 +15,19 @@ import javax.smartcardio.ResponseAPDU;
  * @author xsvenda, Dusan Klinec (ph4r05)
  */
 public class AppletTest {
+    private static String APPLET_AID = "482871d58ab7465e5e05";
+    private static byte APPLET_AID_BYTE[] = Util.hexStringToByteArray(APPLET_AID);
+    private final CardManager cardMngr = new CardManager(true, APPLET_AID_BYTE);
+    private final RunConfig runCfg = RunConfig.getDefaultConfig();
+    private CryptocardClient client;
     
-    public AppletTest() {
+    public AppletTest() throws Exception {
+        runCfg.setAppletToSimulate(MainApplet.class)
+                .setTestCardType(RunConfig.CARD_TYPE.JCARDSIMLOCAL)
+                .setbReuploadApplet(true)
+                .setInstallData(new byte[8]);
+        cardMngr.Connect(runCfg);
+        client = new CryptocardClient(cardMngr.getChannel());
     }
 
     @BeforeClass
@@ -26,18 +40,23 @@ public class AppletTest {
 
     @BeforeMethod
     public void setUpMethod() throws Exception {
+
     }
 
     @AfterMethod
     public void tearDownMethod() throws Exception {
     }
 
-    // Example test
     @Test
-    public void hello() throws Exception {
-        final ResponseAPDU responseAPDU = SimpleAPDU.demoSingleCommand();
-        Assert.assertNotNull(responseAPDU);
-        Assert.assertEquals(0x9000, responseAPDU.getSW());
-        Assert.assertNotNull(responseAPDU.getBytes());
+    public void testPubKey() throws Exception {
+        PublicKey key = client.getPubKey();
+        PublicKey key2 = client.getPubKey();
+        assert(key.equals(key2));
+    }
+
+    @Test
+    public void testSignature() throws Exception {
+        PublicKey pub = client.getPubKey();
+        assert(client.validate(pub));
     }
 }
