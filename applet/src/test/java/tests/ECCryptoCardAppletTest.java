@@ -1,6 +1,6 @@
 package tests;
 
-import applet.RSACryptoCardApplet;
+import applet.ECCryptoCardApplet;
 import cardTools.CardManager;
 import cardTools.RunConfig;
 import cardTools.Util;
@@ -14,14 +14,14 @@ import java.security.PublicKey;
  *
  * @author xsvenda, Dusan Klinec (ph4r05)
  */
-public class CryptoCardAppletTest {
+public class ECCryptoCardAppletTest {
     private static String APPLET_AID = "482871d58ab7465e5e05";
     private static byte APPLET_AID_BYTE[] = Util.hexStringToByteArray(APPLET_AID);
     private CryptocardClient client;
 
-    public CryptoCardAppletTest() throws Exception {
+    public ECCryptoCardAppletTest() throws Exception {
         RunConfig runCfg = RunConfig.getDefaultConfig();
-        runCfg.setAppletToSimulate(RSACryptoCardApplet.class)
+        runCfg.setAppletToSimulate(ECCryptoCardApplet.class)
                 .setTestCardType(RunConfig.CARD_TYPE.JCARDSIMLOCAL)
                 .setbReuploadApplet(true)
                 .setInstallData(new byte[8]);
@@ -51,12 +51,12 @@ public class CryptoCardAppletTest {
     public void testPubKey() throws Exception {
         PublicKey key = client.getPubKey();
         PublicKey key2 = client.getPubKey();
-        assert(key.equals(key2));
+        assert (key.equals(key2));
     }
 
     @Test
     public void testSignature() throws Exception {
         PublicKey pub = client.getPubKey();
-        assert(client.validate(pub));
+        assert (client.validate(pub));
     }
 }
