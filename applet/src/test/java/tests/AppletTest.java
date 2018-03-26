@@ -1,6 +1,6 @@
 package tests;
 
-import applet.MainApplet;
+import applet.RSACryptoCardApplet;
 import cardTools.CardManager;
 import cardTools.RunConfig;
 import cardTools.Util;
@@ -22,7 +22,7 @@ public class AppletTest {
     private CryptocardClient client;
     
     public AppletTest() throws Exception {
-        runCfg.setAppletToSimulate(MainApplet.class)
+        runCfg.setAppletToSimulate(RSACryptoCardApplet.class)
                 .setTestCardType(RunConfig.CARD_TYPE.JCARDSIMLOCAL)
                 .setbReuploadApplet(true)
                 .setInstallData(new byte[8]);

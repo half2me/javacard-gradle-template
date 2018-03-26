@@ -10,7 +10,7 @@ import java.security.spec.RSAPublicKeySpec;
 
 public class CryptocardClient {
     private CardChannel ch;
-    SecureRandom rand;
+    private SecureRandom rand;
 
     private static final byte CLA = 0x00;
 
