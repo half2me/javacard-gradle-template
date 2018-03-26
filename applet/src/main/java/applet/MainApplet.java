@@ -7,7 +7,7 @@ public class MainApplet extends Applet implements ISO7816 {
     private static final short SCRATCHPAD_SIZE = 256;
     private byte[] scratchpad = JCSystem.makeTransientByteArray(SCRATCHPAD_SIZE, JCSystem.CLEAR_ON_DESELECT);
 
-    private KeyPair kp = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_1024);
+    private KeyPair kp = new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_2048);
     private Signature sig = Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
 
     public static void install(byte[] bArray, short bOffset, byte bLength) {

@@ -58,7 +58,7 @@ public class CryptocardClient {
     }
 
     public boolean validate(PublicKey pub) throws CardException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        byte[] challenge = new byte[64];
+        byte[] challenge = new byte[127];
         rand.nextBytes(challenge);
         byte[] response = this.ch.transmit(signChallenge(challenge)).getData();
         Signature verifier = Signature.getInstance("SHA1withRSA");
