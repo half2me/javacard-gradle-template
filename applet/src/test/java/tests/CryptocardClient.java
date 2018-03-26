@@ -44,8 +44,8 @@ public class CryptocardClient {
         switch (type) {
             case 4:
                 // RSA
-                BigInteger exp = new BigInteger(this.ch.transmit(getRSAPubKeyExp()).getData());
-                BigInteger mod = new BigInteger(this.ch.transmit(getRSAPubKeyMod()).getData());
+                BigInteger exp = new BigInteger(1, this.ch.transmit(getRSAPubKeyExp()).getData());
+                BigInteger mod = new BigInteger(1, this.ch.transmit(getRSAPubKeyMod()).getData());
                 KeyFactory kf = KeyFactory.getInstance("RSA");
                 return kf.generatePublic(new RSAPublicKeySpec(mod, exp));
             default:
