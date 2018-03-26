@@ -14,18 +14,18 @@ import java.security.PublicKey;
  *
  * @author xsvenda, Dusan Klinec (ph4r05)
  */
-public class AppletTest {
+public class CryptoCardAppletTest {
     private static String APPLET_AID = "482871d58ab7465e5e05";
     private static byte APPLET_AID_BYTE[] = Util.hexStringToByteArray(APPLET_AID);
-    private final CardManager cardMngr = new CardManager(true, APPLET_AID_BYTE);
-    private final RunConfig runCfg = RunConfig.getDefaultConfig();
     private CryptocardClient client;
-    
-    public AppletTest() throws Exception {
+
+    public CryptoCardAppletTest() throws Exception {
+        RunConfig runCfg = RunConfig.getDefaultConfig();
         runCfg.setAppletToSimulate(RSACryptoCardApplet.class)
                 .setTestCardType(RunConfig.CARD_TYPE.JCARDSIMLOCAL)
                 .setbReuploadApplet(true)
                 .setInstallData(new byte[8]);
+        CardManager cardMngr = new CardManager(true, APPLET_AID_BYTE);
         cardMngr.Connect(runCfg);
         client = new CryptocardClient(cardMngr.getChannel());
     }
