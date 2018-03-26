@@ -1,10 +1,7 @@
 package applet;
 
 import javacard.framework.*;
-import javacard.security.KeyBuilder;
-import javacard.security.KeyPair;
-import javacard.security.RSAPublicKey;
-import javacard.security.Signature;
+import javacard.security.*;
 
 public class ECCryptoCardApplet extends CryptoCardApplet {
 
@@ -22,38 +19,88 @@ public class ECCryptoCardApplet extends CryptoCardApplet {
 
     @Override
     protected KeyPair newKey() {
-        return new KeyPair(KeyPair.ALG_RSA, KeyBuilder.LENGTH_RSA_2048);
+        return new KeyPair(KeyPair.ALG_EC_F2M, KeyBuilder.LENGTH_EC_F2M_193);
     }
 
     @Override
     protected Signature newSig() {
-        return Signature.getInstance(Signature.ALG_RSA_SHA_PKCS1, false);
+        return Signature.getInstance(Signature.ALG_ECDSA_SHA, false);
     }
 
     @Override
     protected void sendPublicKey(APDU apdu, short cmd) {
         switch (cmd) {
-            case 0x01:
-                sendRSAPublicKeyExp(apdu);
+            case 0x03:
+                sendECPublicKeyW(apdu);
                 return;
-            case 0x02:
-                sendRSAPublicKeyMod(apdu);
+            case 0x04:
+                sendECPublicKeyA(apdu);
+                return;
+            case 0x05:
+                sendECPublicKeyB(apdu);
+                return;
+            case 0x06:
+                sendECPublicKeyG(apdu);
+                return;
+            case 0x07:
+                sendECPublicKeyK(apdu);
+                return;
+            case 0x08:
+                sendECPublicKeyR(apdu);
+                return;
+            case 0x09:
+                sendECPublicKeyField(apdu);
                 return;
             default:
                 ISOException.throwIt(ISO7816.SW_INCORRECT_P1P2);
         }
     }
 
-    private void sendRSAPublicKeyMod(APDU apdu) {
-        RSAPublicKey pk = (RSAPublicKey) kp.getPublic();
-        short len = pk.getModulus(scratchpad, (short) 0);
+    private void sendECPublicKeyW(APDU apdu) {
+        ECPublicKey pk = (ECPublicKey) kp.getPublic();
+        short len = pk.getW(scratchpad, (short) 0);
         Util.arrayCopyNonAtomic(scratchpad, (short) 0, apdu.getBuffer(), (short) 0, len);
         apdu.setOutgoingAndSend((short) 0, len);
     }
 
-    private void sendRSAPublicKeyExp(APDU apdu) {
-        RSAPublicKey pk = (RSAPublicKey) kp.getPublic();
-        short len = pk.getExponent(scratchpad, (short) 0);
+    private void sendECPublicKeyA(APDU apdu) {
+        ECPublicKey pk = (ECPublicKey) kp.getPublic();
+        short len = pk.getA(scratchpad, (short) 0);
+        Util.arrayCopyNonAtomic(scratchpad, (short) 0, apdu.getBuffer(), (short) 0, len);
+        apdu.setOutgoingAndSend((short) 0, len);
+    }
+
+    private void sendECPublicKeyB(APDU apdu) {
+        ECPublicKey pk = (ECPublicKey) kp.getPublic();
+        short len = pk.getB(scratchpad, (short) 0);
+        Util.arrayCopyNonAtomic(scratchpad, (short) 0, apdu.getBuffer(), (short) 0, len);
+        apdu.setOutgoingAndSend((short) 0, len);
+    }
+
+    private void sendECPublicKeyG(APDU apdu) {
+        ECPublicKey pk = (ECPublicKey) kp.getPublic();
+        short len = pk.getG(scratchpad, (short) 0);
+        Util.arrayCopyNonAtomic(scratchpad, (short) 0, apdu.getBuffer(), (short) 0, len);
+        apdu.setOutgoingAndSend((short) 0, len);
+    }
+
+    private void sendECPublicKeyK(APDU apdu) {
+        ECPublicKey pk = (ECPublicKey) kp.getPublic();
+        Util.setShort(scratchpad, (short) 0, pk.getK());
+        Util.arrayCopyNonAtomic(scratchpad, (short) 0, apdu.getBuffer(), (short) 0, (short) 2);
+        apdu.setOutgoingAndSend((short) 0, (short) 2);
+    }
+
+    private void sendECPublicKeyR(APDU apdu) {
+        ECPublicKey pk = (ECPublicKey) kp.getPublic();
+        short len = pk.getR(scratchpad, (short) 0);
+        Util.arrayCopyNonAtomic(scratchpad, (short) 0, apdu.getBuffer(), (short) 0, len);
+        apdu.setOutgoingAndSend((short) 0, len);
+    }
+
+    private void sendECPublicKeyField(APDU apdu) {
+        ECPublicKey pk = (ECPublicKey) kp.getPublic();
+        short len = pk.getField(scratchpad, (short) 0);
         Util.arrayCopyNonAtomic(scratchpad, (short) 0, apdu.getBuffer(), (short) 0, len);
         apdu.setOutgoingAndSend((short) 0, len);
     }

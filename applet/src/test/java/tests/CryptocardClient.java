@@ -1,10 +1,15 @@
 package tests;
 
+import org.bouncycastle.asn1.x9.X9ECParameters;
+import org.bouncycastle.asn1.x9.X9ECPoint;
+
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
 import java.math.BigInteger;
 import java.security.*;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 
@@ -20,6 +25,7 @@ public class CryptocardClient {
     private static final byte pubKeyTypeP1 = 0x00;
     private static final byte RSAPubKeyExpP1 = 0x01;
     private static final byte RSAPubKeyModP1 = 0x02;
+    private static final byte ECPubKeyWP1 = 0x03;
 
     private static CommandAPDU getKeyType() {
         return new CommandAPDU(CLA, getPubKeyINS, pubKeyTypeP1, 0);
@@ -31,6 +37,10 @@ public class CryptocardClient {
 
     private static CommandAPDU getRSAPubKeyMod() {
         return new CommandAPDU(CLA, getPubKeyINS, RSAPubKeyModP1, 0);
+    }
+
+    private static CommandAPDU getECPubKeyW() {
+        return new CommandAPDU(CLA, getPubKeyINS, ECPubKeyWP1, 0);
     }
 
     private static CommandAPDU signChallenge(byte[] challenge) {
@@ -52,6 +62,13 @@ public class CryptocardClient {
                 BigInteger mod = new BigInteger(1, this.ch.transmit(getRSAPubKeyMod()).getData());
                 KeyFactory kf = KeyFactory.getInstance("RSA");
                 return kf.generatePublic(new RSAPublicKeySpec(mod, exp));
+            case 9:
+                // EC_F2M
+                byte[] res = this.ch.transmit(getECPubKeyW()).getData();
+                ECPoint w =
+
+                KeyFactory kf = KeyFactory.getInstance("ECDSA");
+                return kf.generatePublic(new ECPublicKeySpec(w, params));
             default:
                 throw new InvalidKeySpecException("Unknown Key type");
         }
