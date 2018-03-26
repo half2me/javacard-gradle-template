@@ -12,25 +12,29 @@ public class CryptocardClient {
     private CardChannel ch;
     SecureRandom rand;
 
-    private static final byte getKeyType = 0x00;
-    private static final byte getRSAPubKeyExp = 0x01;
-    private static final byte getRSAPubKeyMod = 0x02;
-    private static final byte signChallenge = 0x03;
+    private static final byte CLA = 0x00;
+
+    private static final byte getPubKeyINS = 0x00;
+    private static final byte signChallengeINS = 0x01;
+
+    private static final byte pubKeyTypeP1 = 0x00;
+    private static final byte RSAPubKeyExpP1 = 0x01;
+    private static final byte RSAPubKeyModP1 = 0x02;
 
     private static CommandAPDU getKeyType() {
-        return new CommandAPDU(0, getKeyType, 0, 0);
+        return new CommandAPDU(CLA, getPubKeyINS, pubKeyTypeP1, 0);
     }
 
     private static CommandAPDU getRSAPubKeyExp() {
-        return new CommandAPDU(0, getRSAPubKeyExp, 0, 0);
+        return new CommandAPDU(CLA, getPubKeyINS, RSAPubKeyExpP1, 0);
     }
 
     private static CommandAPDU getRSAPubKeyMod() {
-        return new CommandAPDU(0, getRSAPubKeyMod, 0, 0);
+        return new CommandAPDU(CLA, getPubKeyINS, RSAPubKeyModP1, 0);
     }
 
     private static CommandAPDU signChallenge(byte[] challenge) {
-        return new CommandAPDU(0, signChallenge, 0, 0, challenge);
+        return new CommandAPDU(0, signChallengeINS, 0, 0, challenge);
     }
 
     CryptocardClient(CardChannel ch) {

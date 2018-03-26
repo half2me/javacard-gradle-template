@@ -34,6 +34,19 @@ public class MainApplet extends Applet implements ISO7816 {
 
         switch (ins) {
             case 0x00:
+                sendPublicKey(apdu, p1);
+                return;
+            case 0x01:
+                signData(apdu);
+                return;
+            default:
+                ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+        }
+    }
+
+    protected void sendPublicKey(APDU apdu, short cmd) {
+        switch (cmd) {
+            case 0x00:
                 sendPublicKeyType(apdu);
                 return;
             case 0x01:
@@ -42,11 +55,8 @@ public class MainApplet extends Applet implements ISO7816 {
             case 0x02:
                 sendRSAPublicKeyMod(apdu);
                 return;
-            case 0x03:
-                signData(apdu);
-                return;
             default:
-                ISOException.throwIt(ISO7816.SW_INS_NOT_SUPPORTED);
+                ISOException.throwIt(ISO7816.SW_INCORRECT_P1P2);
         }
     }
 
