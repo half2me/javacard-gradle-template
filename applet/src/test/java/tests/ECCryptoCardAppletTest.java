@@ -48,14 +48,14 @@ public class ECCryptoCardAppletTest {
     }
 
     @Test
-    public void testPubKey() throws Exception {
+    public void testECPubKey() throws Exception {
         PublicKey key = client.getPubKey();
         PublicKey key2 = client.getPubKey();
         assert (key.equals(key2));
     }
 
     @Test
-    public void testSignature() throws Exception {
+    public void testECSignature() throws Exception {
         PublicKey pub = client.getPubKey();
         assert (client.validate(pub));
     }

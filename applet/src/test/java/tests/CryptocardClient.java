@@ -96,19 +96,17 @@ public class CryptocardClient {
                 // EC_F2M
                 int m = 2; // Unknown magic number...
                 BigInteger F = new BigInteger(1, this.ch.transmit(getECPubKeyField()).getData());
-                ECField field = new ECFieldF2m(m, F);
-                return getECPubKey(field);
-            case 10:
+                return getECPubKey(new ECFieldF2m(m, F));
+            case 11:
                 // EC_FP
-                BigInteger F = new BigInteger(1, this.ch.transmit(getECPubKeyField()).getData());
-                ECField field = new ECFieldFp(F);
-                return getECPubKey(field);
+                F = new BigInteger(1, this.ch.transmit(getECPubKeyField()).getData());
+                return getECPubKey(new ECFieldFp(F));
             default:
                 throw new InvalidKeySpecException("Unknown Key type");
         }
     }
 
-    private PublicKey getECPubKey(ECField field) throws CardException {
+    private PublicKey getECPubKey(ECField field) throws CardException, NoSuchAlgorithmException, InvalidKeySpecException {
         BigInteger A = new BigInteger(1, this.ch.transmit(getECPubKeyA()).getData());
         BigInteger B = new BigInteger(1, this.ch.transmit(getECPubKeyB()).getData());
 
@@ -123,14 +121,26 @@ public class CryptocardClient {
         ECPoint g = ECPointUtil.decodePoint(curve, G);
         ECParameterSpec domainParams = new ECParameterSpec(curve, g, R, K);
 
-        return KeyFactory.getInstance("ECDSA").generatePublic(new ECPublicKeySpec(w, domainParams));
+        return KeyFactory.getInstance("EC").generatePublic(new ECPublicKeySpec(w, domainParams));
     }
 
     public boolean validate(PublicKey pub) throws CardException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         byte[] challenge = new byte[127];
         rand.nextBytes(challenge);
         byte[] response = this.ch.transmit(signChallenge(challenge)).getData();
-        Signature verifier = Signature.getInstance("SHA1withRSA");
+        Signature verifier;
+
+        switch (pub.getAlgorithm()) {
+            case "RSA":
+                verifier = Signature.getInstance("SHA1withRSA");
+                break;
+            case "EC":
+                verifier = Signature.getInstance("SHA1withECDSA");
+                break;
+                default:
+                    throw new NoSuchAlgorithmException("Public key has unknown algorithm type");
+        }
+
         verifier.initVerify(pub);
         verifier.update(challenge);
         return verifier.verify(response);

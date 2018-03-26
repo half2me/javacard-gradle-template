@@ -15,7 +15,7 @@ import java.security.PublicKey;
  * @author xsvenda, Dusan Klinec (ph4r05)
  */
 public class RSACryptoCardAppletTest {
-    private static String APPLET_AID = "482871d58ab7465e5e05";
+    private static String APPLET_AID = "482871d58ab7465e5e06";
     private static byte APPLET_AID_BYTE[] = Util.hexStringToByteArray(APPLET_AID);
     private CryptocardClient client;
 
@@ -48,14 +48,14 @@ public class RSACryptoCardAppletTest {
     }
 
     @Test
-    public void testPubKey() throws Exception {
+    public void testRSAPubKey() throws Exception {
         PublicKey key = client.getPubKey();
         PublicKey key2 = client.getPubKey();
         assert (key.equals(key2));
     }
 
     @Test
-    public void testSignature() throws Exception {
+    public void testRSASignature() throws Exception {
         PublicKey pub = client.getPubKey();
         assert (client.validate(pub));
     }

@@ -19,7 +19,7 @@ public class ECCryptoCardApplet extends CryptoCardApplet {
 
     @Override
     protected KeyPair newKey() {
-        return new KeyPair(KeyPair.ALG_EC_F2M, KeyBuilder.LENGTH_EC_F2M_193);
+        return new KeyPair(KeyPair.ALG_EC_FP, KeyBuilder.LENGTH_EC_FP_192);
     }
 
     @Override
