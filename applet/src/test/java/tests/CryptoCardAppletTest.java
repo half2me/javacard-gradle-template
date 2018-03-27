@@ -3,6 +3,7 @@ package tests;
 import applet.ECCryptoCardApplet;
 import applet.RSA1024CryptoCardApplet;
 import applet.RSACryptoCardApplet;
+import applet.Secp256k1CryptoCardAppet;
 import com.licel.jcardsim.base.Simulator;
 import javacard.framework.AID;
 import org.testng.annotations.*;
@@ -19,8 +20,9 @@ import java.util.Random;
 public class CryptoCardAppletTest {
     private Class[] applets = new Class[]{
             RSACryptoCardApplet.class,
-            ECCryptoCardApplet.class,
             RSA1024CryptoCardApplet.class,
+            ECCryptoCardApplet.class,
+            Secp256k1CryptoCardAppet.class,
     };
 
     private Simulator simulator = new Simulator();
