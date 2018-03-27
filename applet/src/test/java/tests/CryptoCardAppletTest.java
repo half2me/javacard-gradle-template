@@ -7,6 +7,7 @@ import javacard.framework.AID;
 import org.testng.annotations.*;
 
 import java.security.PublicKey;
+import java.util.Random;
 
 /**
  * Example test class for the applet
@@ -15,17 +16,24 @@ import java.security.PublicKey;
  * @author xsvenda, Dusan Klinec (ph4r05)
  */
 public class CryptoCardAppletTest {
+    private Class[] applets = new Class[]{
+            RSACryptoCardApplet.class,
+            ECCryptoCardApplet.class
+    };
+
     private Simulator simulator = new Simulator();
-    private byte[] rsaAIDbytes = new byte[]{1, 1, 1, 1, 1, 1, 1, 1, 1};
-    private byte[] ecAIDbytes = new byte[]{1, 1, 1, 1, 1, 1, 1, 1, 2};
-    private AID rsaAID = new AID(rsaAIDbytes, (short) 0, (byte) rsaAIDbytes.length);
-    private AID ecAID = new AID(ecAIDbytes, (short) 0, (byte) ecAIDbytes.length);
+    private AID[] aids = new AID[applets.length];
     private CryptoCardClient client = new CryptoCardClient(simulator);
 
-    public CryptoCardAppletTest() throws Exception {
-
-        simulator.installApplet(rsaAID, RSACryptoCardApplet.class);
-        simulator.installApplet(ecAID, ECCryptoCardApplet.class);
+    public CryptoCardAppletTest() {
+        Random rand = new Random();
+        for (int i = 0; i < applets.length; i++) {
+            byte[] aidBytes = new byte[9];
+            rand.nextBytes(aidBytes);
+            AID aid = new AID(aidBytes, (short) 0, (byte) aidBytes.length);
+            simulator.installApplet(aid, applets[i]);
+            aids[i] = aid;
+        }
     }
 
     @BeforeClass
@@ -46,36 +54,23 @@ public class CryptoCardAppletTest {
     }
 
     @Test
-    public void testECPubKey() throws Exception {
-        simulator.selectApplet(ecAID);
+    public void testPubKey() throws Exception {
+        for (AID a : aids) {
+            simulator.selectApplet(a);
 
-        PublicKey key = client.getPubKey();
-        PublicKey key2 = client.getPubKey();
-        assert (key.equals(key2));
+            PublicKey key = client.getPubKey();
+            PublicKey key2 = client.getPubKey();
+            assert (key.equals(key2));
+        }
     }
 
     @Test
-    public void testRSAPubKey() throws Exception {
-        simulator.selectApplet(rsaAID);
+    public void testSignature() throws Exception {
+        for (AID a : aids) {
+            simulator.selectApplet(a);
 
-        PublicKey key = client.getPubKey();
-        PublicKey key2 = client.getPubKey();
-        assert (key.equals(key2));
-    }
-
-    @Test
-    public void testECSignature() throws Exception {
-        simulator.selectApplet(ecAID);
-
-        PublicKey pub = client.getPubKey();
-        assert (client.validate(pub));
-    }
-
-    @Test
-    public void testRSASignature() throws Exception {
-        simulator.selectApplet(rsaAID);
-
-        PublicKey pub = client.getPubKey();
-        assert (client.validate(pub));
+            PublicKey pub = client.getPubKey();
+            assert (client.validate(pub));
+        }
     }
 }
