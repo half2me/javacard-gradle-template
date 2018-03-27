@@ -1,20 +1,19 @@
 package tests;
 
-import org.bouncycastle.jce.ECKeyUtil;
+import com.licel.jcardsim.base.Simulator;
 import org.bouncycastle.jce.ECPointUtil;
-import org.bouncycastle.math.ec.ECFieldElement;
 
-import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
+import javax.smartcardio.ResponseAPDU;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.*;
 import java.security.spec.*;
 
-public class CryptocardClient {
-    private CardChannel ch;
+public class CryptoCardClient {
+    private Simulator sim;
     private SecureRandom rand;
 
     private static final byte CLA = 0x00;
@@ -77,43 +76,47 @@ public class CryptocardClient {
         return new CommandAPDU(0, signChallengeINS, 0, 0, challenge);
     }
 
-    CryptocardClient(CardChannel ch) {
-        this.ch = ch;
+    CryptoCardClient(Simulator sim) {
+        this.sim = sim;
         rand = new SecureRandom();
     }
 
     public PublicKey getPubKey() throws CardException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte type = this.ch.transmit(getKeyType()).getData()[0];
+        byte type = transmit(getKeyType()).getData()[0];
 
 
         switch (type) {
             case 4:
                 // RSA
-                BigInteger exp = new BigInteger(1, this.ch.transmit(getRSAPubKeyExp()).getData());
-                BigInteger mod = new BigInteger(1, this.ch.transmit(getRSAPubKeyMod()).getData());
+                BigInteger exp = new BigInteger(1, transmit(getRSAPubKeyExp()).getData());
+                BigInteger mod = new BigInteger(1, transmit(getRSAPubKeyMod()).getData());
                 return KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(mod, exp));
             case 9:
                 // EC_F2M
                 int m = 2; // Unknown magic number...
-                BigInteger F = new BigInteger(1, this.ch.transmit(getECPubKeyField()).getData());
+                BigInteger F = new BigInteger(1, transmit(getECPubKeyField()).getData());
                 return getECPubKey(new ECFieldF2m(m, F));
             case 11:
                 // EC_FP
-                F = new BigInteger(1, this.ch.transmit(getECPubKeyField()).getData());
+                F = new BigInteger(1, transmit(getECPubKeyField()).getData());
                 return getECPubKey(new ECFieldFp(F));
             default:
                 throw new InvalidKeySpecException("Unknown Key type");
         }
     }
 
-    private PublicKey getECPubKey(ECField field) throws CardException, NoSuchAlgorithmException, InvalidKeySpecException {
-        BigInteger A = new BigInteger(1, this.ch.transmit(getECPubKeyA()).getData());
-        BigInteger B = new BigInteger(1, this.ch.transmit(getECPubKeyB()).getData());
+    private ResponseAPDU transmit(CommandAPDU cmd) {
+        return new ResponseAPDU(this.sim.transmitCommand(cmd.getBytes()));
+    }
 
-        BigInteger R = new BigInteger(1, this.ch.transmit(getECPubKeyR()).getData());
-        int K = (int) ByteBuffer.wrap(this.ch.transmit(getECPubKeyK()).getData()).order(ByteOrder.BIG_ENDIAN).getShort();
-        byte[] W = this.ch.transmit(getECPubKeyW()).getData();
-        byte[] G = this.ch.transmit(getECPubKeyG()).getData();
+    private PublicKey getECPubKey(ECField field) throws CardException, NoSuchAlgorithmException, InvalidKeySpecException {
+        BigInteger A = new BigInteger(1, transmit(getECPubKeyA()).getData());
+        BigInteger B = new BigInteger(1, transmit(getECPubKeyB()).getData());
+
+        BigInteger R = new BigInteger(1, transmit(getECPubKeyR()).getData());
+        int K = (int) ByteBuffer.wrap(transmit(getECPubKeyK()).getData()).order(ByteOrder.BIG_ENDIAN).getShort();
+        byte[] W = transmit(getECPubKeyW()).getData();
+        byte[] G = transmit(getECPubKeyG()).getData();
 
         EllipticCurve curve = new EllipticCurve(field, A, B);
 
@@ -127,7 +130,7 @@ public class CryptocardClient {
     public boolean validate(PublicKey pub) throws CardException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         byte[] challenge = new byte[127];
         rand.nextBytes(challenge);
-        byte[] response = this.ch.transmit(signChallenge(challenge)).getData();
+        byte[] response = transmit(signChallenge(challenge)).getData();
         Signature verifier;
 
         switch (pub.getAlgorithm()) {
