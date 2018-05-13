@@ -4,6 +4,7 @@ import applet.ECCryptoCardApplet;
 import applet.RSA1024CryptoCardApplet;
 import applet.RSACryptoCardApplet;
 import applet.Secp256k1CryptoCardAppet;
+import client.CryptoCardClient;
 import com.licel.jcardsim.base.Simulator;
 import javacard.framework.AID;
 import org.testng.annotations.*;

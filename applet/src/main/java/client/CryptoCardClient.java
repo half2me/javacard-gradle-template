@@ -1,6 +1,6 @@
-package tests;
+package client;
 
-import com.licel.jcardsim.base.Simulator;
+import com.licel.jcardsim.io.CardInterface;
 import org.bouncycastle.jce.ECPointUtil;
 
 import javax.smartcardio.CardException;
@@ -13,7 +13,7 @@ import java.security.*;
 import java.security.spec.*;
 
 public class CryptoCardClient {
-    private Simulator sim;
+    private CardInterface card;
     private SecureRandom rand;
 
     private static final byte CLA = 0x00;
@@ -76,8 +76,8 @@ public class CryptoCardClient {
         return new CommandAPDU(0, signChallengeINS, 0, 0, challenge);
     }
 
-    CryptoCardClient(Simulator sim) {
-        this.sim = sim;
+    public CryptoCardClient(CardInterface card) {
+        this.card = card;
         rand = new SecureRandom();
     }
 
@@ -106,7 +106,7 @@ public class CryptoCardClient {
     }
 
     private ResponseAPDU transmit(CommandAPDU cmd) {
-        return new ResponseAPDU(this.sim.transmitCommand(cmd.getBytes()));
+        return new ResponseAPDU(this.card.transmitCommand(cmd.getBytes()));
     }
 
     private PublicKey getECPubKey(ECField field) throws CardException, NoSuchAlgorithmException, InvalidKeySpecException {
